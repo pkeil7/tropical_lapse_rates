@@ -1,6 +1,11 @@
 # Code Repository for the Tropical Lapse Rates Paper
 
-Short documentation on how to use the scripts that produce Figures for the article "Variations in Tropical Lapse Rates in Climate Models and their Implications for upper Tropospheric Warming". Please be aware that the scripts were all designed to run on a high performance computer (in this case "mistral" from the DKRZ) and therefore most of the scripts won't run out of the box on a laptop. The used data is large in size and processed with high memory usage. Some basic functions are stored in the `metcalc.py` and `aes_thermo.py` files, but the processing and visualising is done in jupyter notebooks (and one bash script with cdos for the ICON experiments). Python package versions used:
+Short documentation on how to use the scripts that produce Figures for the article "Variations in Tropical Lapse Rates in Climate Models and their Implications for upper Tropospheric Warming".
+
+- Link to paper: https://doi.org/10.1175/JCLI-D-21-0196.1
+- Link to freely accessible preprint: http://hdl.handle.net/21.11116/0000-0009-6803-F
+
+Please be aware that the scripts were all designed to run on a high performance computer (in this case "mistral" from the DKRZ) and therefore most of the scripts won't run out of the box on a laptop. The used data is large in size and processed with high memory usage. Some basic functions are stored in the `metcalc.py` and `aes_thermo.py` files, but the processing and visualising is done in jupyter notebooks (and one bash script with cdos for the ICON experiments). Python package versions used:
 
  - `xarray` : 0.16.2
  - `intake_esm` : 2020.12.18
@@ -29,7 +34,7 @@ Once the model is correctly compiled and set up, there should be an automaticall
 - Turbulent entrainment: `echam_cnv_config(1)%entrpen`
 - Autoconversion: `echam_cnv_config(1)%cprcon`
 
-To get an ensemble of simulations, individual simulations with slightly different rayleigh coefficients were run, for example `rayleigh_coeff = 0.1001` instead of `rayleigh_coeff = 0.1` was set in the runscript. If you have access to the MPI gitlab, you can download the exact model version used in the study with the git hash `7d005add0c8b705066e60774d811d61d6e79552f`, which you can get with `git fetch origin 7d005add0c8b705066e60774d811d61d6e79552f`. You can also contact me directly for access to model output data: `paul.keil@mpimet.mpg.de`
+To get an ensemble of simulations, individual simulations with slightly different rayleigh coefficients were run, for example `rayleigh_coeff = 0.1001` instead of `rayleigh_coeff = 0.1` was set in the runscript. If you have access to the MPI gitlab, you can download the exact model version used in the study with the git hash `7d005add0c8b705066e60774d811d61d6e79552f`, which you can get with `git fetch origin 7d005add0c8b705066e60774d811d61d6e79552f`. You can also contact me directly for access to model output data: `paul.keil AT mpimet.mpg.de`
 
 Data from the ICON experiments are processed with the `process_icon-param_mm.sh`: horizontal and vertical interpolation, and tropical fieldmean.
 
