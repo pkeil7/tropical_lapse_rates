@@ -58,6 +58,31 @@ def get_z_from_p(P,T):
 def get_p_from_z(z,T):
     p = 101000. * np.exp(- ( z * mt.gravity) / (mt.Rd * T))
 
+def pressure2height(pressure,T0=288.15,gamma = -6.5e-3,P0 = 101325):
+    '''Calculate geometric height from surface with barometric height formula.
+    For the troposphere (until 250hPa) we use the barometric height formula with a vertical temperature gradient gamma.
+    See also equations 39 and 40 in: Berberan-Santos, M. N., Bodunov, E. N., & Pogliani, L. (1997). On the barometric formula. American Journal of Physics, 65(5), 404-412.
+    For the tropopause region and the lower stratosphere (250-50hPa) we use a constant temperature of 216.65 K.
+    '''
+    # using for example gamma=-7.5e-3 gives a difference of 200m at 250hPa. Not dramatic but be aware!
+    pressure = np.asarray(pressure).flatten()
+    scalar_input = False
+    if pressure.ndim == 0:
+        pressure = pressure[None]  # Makes x 1D
+        if pressure >= 25000. :
+            return (T0/gamma) * ( (pressure/P0)**( - gamma*mt.Rd/mt.gravity ) - 1.0 )
+        elif pressure < 25000. & pressure > 5000. :
+            return -mt.Rd *216.65 / mt.gravity*(np.log(P)-np.log(25000.)) # test this!
+        else :
+            print("pressure values to small. Calculation goes to 50hPa!")
+    else :
+        pressure_trop = pressure[pressure >= 25000.]
+        pressure_strat = pressure[pressure < 25000.]
+        z_trop = (T0/gamma) * ( (pressure_trop/P0)**( - gamma*mt.Rd/mt.gravity ) - 1.0 )
+        z0_strat = (T0/gamma) * ( (25000./P0)**( - gamma*mt.Rd/mt.gravity ) - 1.0 )
+        z_strat = -mt.Rd *216.65 / mt.gravity*(np.log(pressure_strat)-np.log(25000.)) + z0_strat
+        return np.concatenate((z_trop, z_strat))
+
 
 def xr_convert_vertical_velocity(wap,T):
     '''wap and T are xarray datasets or arrays with pressure as vertical corrdinate
@@ -163,7 +188,7 @@ def remove_axes(ax) :
 def set_regional_cartopy(ax,projection=ccrs.PlateCarree(central_longitude=180),extent=[0, 359, -20, 20]) :
     ax.coastlines()
     ax.set_extent(extent, projection)
-    
+
 
 # ----- THERMODYNAMICS:
 
@@ -272,13 +297,13 @@ def xr_get_theta_es(T, P) :
 
 
 def xr_MSE(T,q):
-    '''Takes temperature and specific humidtiy on pressure levels 
+    '''Takes temperature and specific humidtiy on pressure levels
     and returns moist static energy'''
-    
+
     assert T.plev2.values.all() == q.plev2.values.all()
-    
+
     z = get_z_from_p(T.plev2 *100.,270.)
-    
+
     hd = mt.cpd*(T-mt.T0) + mt.gravity*z
     hv = mt.cpv*(T-mt.T0) + mt.gravity*z + mt.lv0
 
@@ -511,7 +536,7 @@ def dT_entrainment(T,P,RH,epsilon):
 
     Delta_T = np.zeros_like(P)
     qs_env = calculate_qs(T,P)
-    Z = get_z_from_p(P,T)
+    Z = pressure2height(P)
 
     P_cb = 96000 # Level where entrainment effect starts (arbitrary)
 
